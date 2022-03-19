@@ -21,7 +21,6 @@ class PostModelTest(TestCase):
             text='Тестовая пост',
         )
 
-
     def test_models_have_correct_object_names(self):
         """Проверяем, что у модели User корректно работает __str__."""
         user = PostModelTest.user  # Обратите внимание на синтаксис

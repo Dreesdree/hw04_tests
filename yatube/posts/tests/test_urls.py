@@ -2,8 +2,8 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 from posts.models import Group, Post
 
-
 User = get_user_model()
+
 
 class PostURLTests(TestCase):
     @classmethod
@@ -88,4 +88,3 @@ class StaticURLTests(TestCase):
         # созданный в setUp()
         response = self.guest_client.get('/')
         self.assertEqual(response.status_code, 200)
-

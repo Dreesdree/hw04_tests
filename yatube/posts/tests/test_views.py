@@ -3,9 +3,10 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django import forms
 
-from posts.models import Group,Post
+from posts.models import Group, Post
 
 User = get_user_model()
+
 
 class PostPagesTests(TestCase):
     @classmethod
@@ -32,11 +33,19 @@ class PostPagesTests(TestCase):
         # Собираем в словарь пары "имя_html_шаблона: reverse(name)"
         templates_pages_names = {
             reverse('posts:index'): 'posts/index.html',
-            reverse('posts:group_list', kwargs={'slug': 'test_slug'}): 'posts/group_list.html',
-            reverse('posts:profile', kwargs={'username': 'Имя'}): 'posts/profile.html',
-            reverse('posts:post_detail', kwargs={'post_id': self.post.pk}): 'posts/post_detail.html',
+            reverse('posts:group_list',
+                    kwargs={'slug': 'test_slug'}
+                    ): 'posts/group_list.html',
+            reverse('posts:profile',
+                    kwargs={'username': 'Имя'}
+                    ): 'posts/profile.html',
+            reverse('posts:post_detail',
+                    kwargs={'post_id': self.post.pk}
+                    ): 'posts/post_detail.html',
             reverse('posts:post_create'): 'posts/create_post.html',
-            reverse('posts:post_edit', kwargs={'post_id': self.post.pk}): 'posts/create_post.html',
+            reverse('posts:post_edit',
+                    kwargs={'post_id': self.post.pk}
+                    ): 'posts/create_post.html',
         }
         # Проверяем, что при обращении к name вызывается соответствующий HTML-шаблон
         for reverse_name, template in templates_pages_names.items():
