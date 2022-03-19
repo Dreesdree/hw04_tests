@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Посты выбранной группы{% endblock %}
+{% block content %}
+<h1>{{ group.title }}</h1>
+  <p>
+    {{ group.description|linebreaks }}
+  </p>
+{% for post in group.posts.all %}
+  <article>
+    <ul>
+      <li>
+        Автор:
+        <a href="{% url 'posts:profile' post.author.username %}">{{ post.author.username }}</a>
+      </li>
+      <li>
+        Дата публикации: {{ post.pub_date|date:"d E Y" }}
+      </li>
+    </ul>
+    <p>
+      {{ post.text|linebreaks }}
+    </p>
+  </article>
+{% endfor %}
+{% include 'includes/paginator.html' %}
+{% endblock %}
