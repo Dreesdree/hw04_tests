@@ -64,14 +64,14 @@ class PostURLTests(TestCase):
         """URL-адрес использует соответствующий шаблон."""
         # Шаблоны по адресам
         templates_url_names = {
-            'posts/index.html': '/',
-            'posts/group_list.html': '/group/test_slug/',
-            'posts/profile.html': '/profile/Имя/',
-            'posts/post_detail.html': '/posts/1/',
-            'posts/create_post.html': '/posts/1/edit/',
-            'posts/create_post.html': '/create/',
+            '/': 'posts/index.html',
+            '/group/test_slug/': 'posts/group_list.html',
+            '/profile/Имя/': 'posts/profile.html',
+            '/posts/1/': 'posts/post_detail.html',
+            '/posts/1/edit/': 'posts/create_post.html',
+            '/create/': 'posts/create_post.html',
         }
-        for template, address in templates_url_names.items():
+        for address, template in templates_url_names.items():
             with self.subTest(address=address):
                 response = self.authorized_client.get(address)
                 self.assertTemplateUsed(response, template)

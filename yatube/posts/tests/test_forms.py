@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
-from django.core.files.uploadedfile import SimpleUploadedFile
 
 from posts.forms import PostForm
 from posts.models import Group, Post
@@ -48,7 +47,7 @@ class PostFormTest(TestCase):
         self.assertRedirects(response, reverse(
             'posts:profile',
             kwargs={'username': f'{self.user}'})
-                             )
+            )
         # Проверяем, увеличилось ли число постов
         self.assertEqual(Post.objects.count(), post_count + 1)
         # Проверяем, что создалась запись с заданным слагом

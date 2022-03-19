@@ -30,7 +30,6 @@ class PostPagesTests(TestCase):
 
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
-        # Собираем в словарь пары "имя_html_шаблона: reverse(name)"
         templates_pages_names = {
             reverse('posts:index'): 'posts/index.html',
             reverse('posts:group_list',
@@ -47,7 +46,6 @@ class PostPagesTests(TestCase):
                     kwargs={'post_id': self.post.pk}
                     ): 'posts/create_post.html',
         }
-        # Проверяем, что при обращении к name вызывается соответствующий HTML-шаблон
         for reverse_name, template in templates_pages_names.items():
             with self.subTest(reverse_name=reverse_name):
                 response = self.authorized_client.get(reverse_name)
@@ -115,8 +113,10 @@ class PostPagesTests(TestCase):
         const = {"group": self.post.group}
         form_fields = {
             reverse("posts:index"): const,
-            reverse("posts:group_list", kwargs={"slug": self.group.slug}): const,
-            reverse("posts:profile", kwargs={"username": self.post.author}): const,
+            reverse("posts:group_list",
+                    kwargs={"slug": self.group.slug}): const,
+            reverse("posts:profile",
+                    kwargs={"username": self.post.author}): const,
         }
         for value, expected in form_fields.items():
             with self.subTest(value=value):
@@ -125,7 +125,7 @@ class PostPagesTests(TestCase):
                 self.assertIn(form_field, expected)
 
     def check_group_not_in_mistake_group_list_page(self):
-        """Проверяем чтобы созданный Пост с группой не попап в чужую группу."""
+        """Проверяем чтобы созданный Пост не попап в чужую группу."""
         response = self.authorized_client.get(
             reverse("posts:group_list", kwargs={"slug": self.group.slug})
         )
