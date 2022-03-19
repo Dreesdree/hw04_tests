@@ -31,26 +31,21 @@ class PostFormTest(TestCase):
 
     def test_create_task(self):
         """Валидная форма создает запись в Task."""
-        # Подсчитаем количество записей в Task
         post_count = Post.objects.count()
         form_data = {
             'text': 'Тестовый текст',
             'group': PostFormTest.group.id,
         }
-        # Отправляем POST-запрос
         response = self.authorized_client.post(
             reverse('posts:post_create'),
             data=form_data,
             follow=True
         )
-        # Проверяем, сработал ли редирект
         self.assertRedirects(response, reverse(
             'posts:profile',
-            kwargs={'username': f'{self.user}'})
-            )
-        # Проверяем, увеличилось ли число постов
+            kwargs={'username': f'{self.user}'}
+        )
         self.assertEqual(Post.objects.count(), post_count + 1)
-        # Проверяем, что создалась запись с заданным слагом
         self.assertTrue(
             Post.objects.filter(
                 text='Тестовый текст',
