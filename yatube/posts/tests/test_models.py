@@ -82,7 +82,9 @@ class PostModelTest(TestCase):
             for field, expected_value in field_verboses.items():
                 with self.subTest(field=field):
                     self.assertEqual(
-                        group._meta.get_field(field).verbose_name, expected_value)
+                        group._meta.get_field(field).verbose_name,
+                        expected_value
+                    )
 
         def test_help_text_group(self):
             """Проверяем help_text совпадает с ожидаемым в модели Group."""
