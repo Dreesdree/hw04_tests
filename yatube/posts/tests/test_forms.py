@@ -22,7 +22,6 @@ class PostFormTest(TestCase):
             author=cls.user,
             text='Тестовая пост',
         )
-        cls.form = PostForm()
 
     def setUp(self):
         self.guest_client = Client()
@@ -55,6 +54,11 @@ class PostFormTest(TestCase):
 
     def test_edit_post(self):
         """Проверка формы редактирования поста"""
+        post = Post.objects.create(
+            author=self.user,
+            text='Тестовая пост',
+        )
+        post_count = Post.objects.count()
         form_data = {
             'text': 'Тестовый тест новый',
             'group': PostFormTest.group.id
@@ -72,6 +76,7 @@ class PostFormTest(TestCase):
                 'posts:post_detail',
                 kwargs={'post_id': f'{self.post.id}'}
             ))
+        self.assertEqual(Post.objects.count(), post_count)
         self.assertTrue(
             Post.objects.filter(
                 text='Тестовый тест новый',

@@ -51,6 +51,18 @@ class PostPagesTests(TestCase):
                 response = self.authorized_client.get(reverse_name)
                 self.assertTemplateUsed(response, template)
 
+    def check_post(self):
+        """Принимает объект поста и проверяет его атрибуты"""
+        response = self.guest_client.get(
+            reverse("posts:post_detail", kwargs={"post_id": self.post.id})
+        )
+        field_1 = response.context.get("post").text
+        field_2 = response.context.get("post").author
+        field_3 = response.context.get("post").group
+        self.assertEqual(field_1, self.post.text)
+        self.assertEqual(field_2, self.post.author)
+        self.assertEqual(field_3, self.post.group)
+
     def test_index_show_correct_context(self):
         """Список постов в шаблоне index равен ожидаемому контексту."""
         response = self.guest_client.get(reverse("posts:index"))
@@ -75,12 +87,7 @@ class PostPagesTests(TestCase):
 
     def test_post_detail_show_correct_context(self):
         """Шаблон post_detail сформирован с правильным контекстом."""
-        response = self.guest_client.get(
-            reverse("posts:post_detail", kwargs={"post_id": self.post.id})
-        )
-        self.assertEqual(response.context.get("post").text, self.post.text)
-        self.assertEqual(response.context.get("post").author, self.post.author)
-        self.assertEqual(response.context.get("post").group, self.post.group)
+        self.check_post()
 
     def test_create_edit_show_correct_context(self):
         """Шаблон create_edit сформирован с правильным контекстом."""
@@ -136,3 +143,57 @@ class PostPagesTests(TestCase):
             with self.subTest(value=value):
                 form_field = response.context["page_obj"].fields[value]
                 self.assertNotIn(form_field, expected)
+
+
+class PaginatorViewsTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create_user(username='Имя')
+        cls.group = Group.objects.create(
+            title='Тестовое название группы',
+            slug='test_slug',
+            description='Тестовое описание'
+        )
+        cls.posts = [
+            Post.objects.create(
+                author=cls.user,
+                text='Текст поста № {i}',
+                group=cls.group
+            )
+            for i in range(13)
+        ]
+
+    def setUp(self):
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+
+    def test_first_page_contains_ten_records(self):
+        """На первой странице 10 постов"""
+        url_paginator_test = [
+            reverse('posts:index'),
+            reverse('posts:group_list', kwargs={
+                'slug': self.group.slug}),
+            reverse('posts:profile', kwargs={
+                'username': self.user.username})
+        ]
+        for url_name in url_paginator_test:
+            with self.subTest(url_name=url_name):
+                response = self.authorized_client.get(url_name)
+                self.assertEqual(len(response.context['page_obj']), 10)
+
+    def test_second_page_contains_three_records(self):
+        """На второй оставшиеся 3 поста"""
+        url_paginator_test = [
+            reverse('posts:index') + '?page=2',
+            reverse(
+                'posts:group_list', kwargs={
+                    'slug': self.group.slug}) + '?page=2',
+            reverse(
+                'posts:profile', kwargs={
+                    'username': self.user.username}) + '?page=2'
+        ]
+        for url_name in url_paginator_test:
+            with self.subTest(url_name=url_name):
+                response = self.authorized_client.get(url_name)
+                self.assertEqual(len(response.context['page_obj']), 3)
