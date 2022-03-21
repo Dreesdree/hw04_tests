@@ -5,6 +5,7 @@ from posts.models import Group, Post
 
 User = get_user_model()
 
+
 class PostModelTest(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -26,7 +27,6 @@ class PostModelTest(TestCase):
         post = self.post
         expected_object_name = post.text
         self.assertEqual(expected_object_name, str(post))
-
 
     def test_verbose_name_post(self):
         """Проверяем verbose_name совпадает с ожидаемым в модели Post."""

@@ -18,10 +18,6 @@ class PostFormTest(TestCase):
             slug='test_slug',
             description='Тестовое описание',
         )
-        cls.post = Post.objects.create(
-            author=cls.user,
-            text='Тестовая пост',
-        )
 
     def setUp(self):
         self.guest_client = Client()
@@ -33,7 +29,7 @@ class PostFormTest(TestCase):
         post_count = Post.objects.count()
         form_data = {
             'text': 'Тестовый текст',
-            'group': PostFormTest.group.id,
+            'group': self.group.id,
         }
         response = self.authorized_client.post(
             reverse('posts:post_create'),
@@ -48,7 +44,7 @@ class PostFormTest(TestCase):
         self.assertTrue(
             Post.objects.filter(
                 text='Тестовый текст',
-                group=PostFormTest.group.id
+                group=self.group.id
             ).exists()
         )
 
@@ -61,12 +57,12 @@ class PostFormTest(TestCase):
         post_count = Post.objects.count()
         form_data = {
             'text': 'Тестовый тест новый',
-            'group': PostFormTest.group.id
+            'group': self.group.id
         }
         response = self.authorized_client.post(
             reverse(
                 'posts:post_edit',
-                kwargs={'post_id': f'{self.post.id}'}),
+                kwargs={'post_id': f'{post.id}'}),
             data=form_data,
             follow=True
         )
@@ -74,16 +70,16 @@ class PostFormTest(TestCase):
             response,
             reverse(
                 'posts:post_detail',
-                kwargs={'post_id': f'{self.post.id}'}
+                kwargs={'post_id': f'{post.id}'}
             ))
         self.assertEqual(Post.objects.count(), post_count)
         self.assertTrue(
             Post.objects.filter(
                 text='Тестовый тест новый',
-                group=PostFormTest.group.id
+                group=self.group.id
             ).exists())
         self.assertFalse(
             Post.objects.filter(
                 text='Тестовый текст',
-                group=PostFormTest.group.id
+                group=self.group.id
             ).exists())
