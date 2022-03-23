@@ -56,7 +56,7 @@ class PostPagesTests(TestCase):
         """Принимает объект поста и проверяет его атрибуты"""
         self.assertEqual(post.text, self.post.text)
         self.assertEqual(post.author, self.post.author)
-
+        self.assertEqual(post.group, self.post.group)
 
     def test_index_show_correct_context(self):
         """Список постов в шаблоне index равен ожидаемому контексту."""
@@ -85,7 +85,6 @@ class PostPagesTests(TestCase):
         post = response.context['page_obj'][0]
         self.check_post(post)
         self.assertEqual(list(response.context['page_obj']), expected)
-
 
     def test_post_detail_show_correct_context(self):
         """Шаблон post_detail сформирован с правильным контекстом."""
@@ -143,7 +142,7 @@ class PostPagesTests(TestCase):
             reverse('posts:group_list', kwargs={'slug': self.group.slug})
         )
         form_fields = {
-            "group": self.post.group,
+            'group': self.post.group,
         }
         for value, expected in form_fields.items():
             with self.subTest(value=value):
