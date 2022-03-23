@@ -21,6 +21,7 @@ class PostPagesTests(TestCase):
         cls.post = Post.objects.create(
             author=cls.user,
             text='Тестовая пост',
+            group=cls.group,
         )
 
     def setUp(self):
@@ -51,97 +52,102 @@ class PostPagesTests(TestCase):
                 response = self.authorized_client.get(reverse_name)
                 self.assertTemplateUsed(response, template)
 
-    def check_post(self):
+    def check_post(self, post):
         """Принимает объект поста и проверяет его атрибуты"""
-        response = self.guest_client.get(
-            reverse("posts:post_detail", kwargs={"post_id": self.post.id})
-        )
-        field_1 = response.context.get("post").text
-        field_2 = response.context.get("post").author
-        field_3 = response.context.get("post").group
-        self.assertEqual(field_1, self.post.text)
-        self.assertEqual(field_2, self.post.author)
-        self.assertEqual(field_3, self.post.group)
+        self.assertEqual(post.text, self.post.text)
+        self.assertEqual(post.author, self.post.author)
+
 
     def test_index_show_correct_context(self):
         """Список постов в шаблоне index равен ожидаемому контексту."""
-        response = self.guest_client.get(reverse("posts:index"))
-        expected = list(Post.objects.all()[:10])
-        self.assertEqual(list(response.context["page_obj"]), expected)
+        response = self.guest_client.get(reverse('posts:index'))
+        expected = list(Post.objects.all())
+        post = response.context['page_obj'][0]
+        self.check_post(post)
+        self.assertEqual(list(response.context['page_obj']), expected)
 
     def test_group_list_show_correct_context(self):
         """Список постов в шаблоне group_list равен ожидаемому контексту."""
         response = self.guest_client.get(
-            reverse("posts:group_list", kwargs={"slug": self.group.slug})
+            reverse('posts:group_list', kwargs={'slug': self.group.slug})
         )
-        expected = list(Post.objects.filter(group_id="1")[:10])
-        self.assertEqual(list(response.context["page_obj"]), expected)
+        expected = list(Post.objects.filter(group_id='1'))
+        post = response.context['page_obj'][0]
+        self.check_post(post)
+        self.assertEqual(list(response.context['page_obj']), expected)
 
     def test_profile_show_correct_context(self):
         """Список постов в шаблоне profile равен ожидаемому контексту."""
         response = self.guest_client.get(
-            reverse("posts:profile", args=(self.post.author,))
+            reverse('posts:profile', args=(self.post.author,))
         )
-        expected = list(Post.objects.filter(author_id="1")[:10])
-        self.assertEqual(list(response.context["page_obj"]), expected)
+        expected = list(Post.objects.filter(author_id='1'))
+        post = response.context['page_obj'][0]
+        self.check_post(post)
+        self.assertEqual(list(response.context['page_obj']), expected)
+
 
     def test_post_detail_show_correct_context(self):
         """Шаблон post_detail сформирован с правильным контекстом."""
-        self.check_post()
+        response = self.guest_client.get(
+            reverse('posts:post_detail', kwargs={'post_id': self.post.id})
+        )
+        post = response.context.get('post')
+        self.check_post(post)
 
     def test_create_edit_show_correct_context(self):
         """Шаблон create_edit сформирован с правильным контекстом."""
         response = self.authorized_client.get(
-            reverse("posts:post_edit", kwargs={"post_id": self.post.id})
+            reverse('posts:post_edit', kwargs={'post_id': self.post.id})
         )
         form_fields = {
-            "text": forms.fields.CharField,
-            "group": forms.models.ModelChoiceField,
+            'text': forms.fields.CharField,
+            'group': forms.models.ModelChoiceField,
         }
         for value, expected in form_fields.items():
             with self.subTest(value=value):
-                form_field = response.context["form"].fields[value]
+                form_field = response.context['form'].fields[value]
                 self.assertIsInstance(form_field, expected)
 
     def test_create_show_correct_context(self):
         """Шаблон create сформирован с правильным контекстом."""
-        response = self.authorized_client.get(reverse("posts:post_create"))
+        response = self.authorized_client.get(reverse('posts:post_create'))
         form_fields = {
-            "text": forms.fields.CharField,
-            "group": forms.models.ModelChoiceField,
+            'text': forms.fields.CharField,
+            'group': forms.models.ModelChoiceField,
         }
         for value, expected in form_fields.items():
             with self.subTest(value=value):
-                form_field = response.context["form"].fields[value]
+                form_field = response.context['form'].fields[value]
                 self.assertIsInstance(form_field, expected)
 
     def check_group_in_pages(self):
         """Проверяем создание group при создании поста на страницах."""
-        const = {"group": self.post.group}
+        const = {'group': self.post.group}
         form_fields = {
-            reverse("posts:index"): const,
-            reverse("posts:group_list",
-                    kwargs={"slug": self.group.slug}): const,
-            reverse("posts:profile",
-                    kwargs={"username": self.post.author}): const,
+            reverse('posts:index'): const,
+            reverse('posts:group_list',
+                    kwargs={'slug': self.group.slug}): const,
+            reverse('posts:profile',
+                    kwargs={'username': self.post.author}): const,
         }
         for value, expected in form_fields.items():
             with self.subTest(value=value):
                 response = self.authorized_client.get(value)
-                form_field = response.context["page_obj"].fields[value]
+                form_field = response.context['page_obj'].fields[value]
                 self.assertIn(form_field, expected)
 
     def check_group_not_in_mistake_group_list_page(self):
         """Проверяем чтобы созданный Пост не попап в чужую группу."""
         response = self.authorized_client.get(
-            reverse("posts:group_list", kwargs={"slug": self.group.slug})
+            reverse('posts:group_list', kwargs={'slug': self.group.slug})
         )
         form_fields = {
             "group": self.post.group,
         }
         for value, expected in form_fields.items():
             with self.subTest(value=value):
-                form_field = response.context["page_obj"].fields[value]
+                form_field = response.context['page_obj'].fields[value]
                 self.assertNotIn(form_field, expected)
 
 
