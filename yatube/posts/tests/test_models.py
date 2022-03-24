@@ -57,6 +57,7 @@ class PostModelTest(TestCase):
                     post._meta.get_field(field).help_text, expected_value
                 )
 
+
 class GroupModelTest(TestCase):
     @classmethod
     def setUpClass(cls):
